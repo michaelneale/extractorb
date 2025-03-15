@@ -21,45 +21,59 @@ jobs:
       - name: Build release binary
         run: cargo build --release
 
-      - name: Create release directory
-        run: mkdir -p release
-
-      - name: Copy binary to release directory
+      - name: Package binary
         run: |
-          cp target/release/extractorb release/
-          cd release
-          tar -czf extractorb-macos.tar.gz extractorb
-          shasum -a 256 extractorb-macos.tar.gz > extractorb-macos.tar.gz.sha256
+          mkdir -p dist
+          cp target/release/extractorb dist/
+          cd dist
+          # Create a zip file instead of tar.gz for better compatibility
+          zip -r extractorb-macos.zip extractorb
+          shasum -a 256 extractorb-macos.zip > extractorb-macos.zip.sha256
 
-      - name: Delete existing 'latest' release if it exists
-        uses: dev-drprasad/delete-tag-and-release@v1.0
+      # This approach uses GitHub's built-in release mechanism
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: latest
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          delete_release: true
-        continue-on-error: true
-
-      - name: Create new 'latest' release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Latest Build
-          tag_name: latest
-          files: |
-            release/extractorb-macos.tar.gz
-            release/extractorb-macos.tar.gz.sha256
+          release_name: Latest Build
           body: |
             This is the latest build of extractorb from the main branch.
             
             ## Installation
             
             ```bash
-            # Download and extract
-            curl -L https://github.com/michaelneale/extractorb/releases/download/latest/extractorb-macos.tar.gz -o extractorb-macos.tar.gz
-            tar -xzf extractorb-macos.tar.gz
+            # Download
+            curl -LO https://github.com/michaelneale/extractorb/releases/download/latest/extractorb-macos.zip
             
-            # Move to a directory in your PATH (optional)
+            # Extract
+            unzip extractorb-macos.zip
+            
+            # Make executable and move to PATH (optional)
             chmod +x extractorb
             sudo mv extractorb /usr/local/bin/
             ```
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset (Binary)
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/extractorb-macos.zip
+          asset_name: extractorb-macos.zip
+          asset_content_type: application/zip
+
+      - name: Upload Release Asset (Checksum)
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/extractorb-macos.zip.sha256
+          asset_name: extractorb-macos.zip.sha256
+          asset_content_type: text/plain

@@ -20,11 +20,13 @@ Make sure you have Rust and Cargo installed. If not, install them from [rustup.r
 You can download the latest pre-built binary for macOS from the GitHub releases:
 
 ```bash
-# Download and extract
-curl -L https://github.com/owner/extractorb/releases/download/latest/extractorb-macos.tar.gz -o extractorb-macos.tar.gz
-tar -xzf extractorb-macos.tar.gz
+# Download the zip file
+curl -LO https://github.com/michaelneale/extractorb/releases/download/latest/extractorb-macos.zip
 
-# Move to a directory in your PATH (optional)
+# Extract the binary
+unzip extractorb-macos.zip
+
+# Make it executable and move to a directory in your PATH (optional)
 chmod +x extractorb
 sudo mv extractorb /usr/local/bin/
 ```
@@ -33,7 +35,7 @@ sudo mv extractorb /usr/local/bin/
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/extractorb.git
+git clone https://github.com/michaelneale/extractorb.git
 cd extractorb
 
 # Build the project
@@ -92,12 +94,12 @@ This project is licensed under the Apache License 2.0.
 This project uses GitHub Actions for continuous integration and deployment:
 
 - Every push to the `main` branch triggers a build and release process
-- The latest build is automatically published to the [GitHub Releases](https://github.com/owner/extractorb/releases/tag/latest) page with the tag `latest`
+- The latest build is automatically published to the [GitHub Releases](https://github.com/michaelneale/extractorb/releases/tag/latest) page with the tag `latest`
 - Pre-built binaries are available for macOS
 
 The CI/CD workflow:
 1. Builds the project using the latest stable Rust toolchain
-2. Creates a compressed tarball of the binary
+2. Creates a zip file containing the binary
 3. Generates a SHA256 checksum for verification
 4. Publishes these artifacts to GitHub Releases
 
