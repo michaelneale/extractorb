@@ -15,6 +15,20 @@ A simple CLI tool that extracts text from documents and outputs it to a text fil
 
 Make sure you have Rust and Cargo installed. If not, install them from [rustup.rs](https://rustup.rs/).
 
+### Download pre-built binary
+
+You can download the latest pre-built binary for macOS from the GitHub releases:
+
+```bash
+# Download and extract
+curl -L https://github.com/owner/extractorb/releases/download/latest/extractorb-macos.tar.gz -o extractorb-macos.tar.gz
+tar -xzf extractorb-macos.tar.gz
+
+# Move to a directory in your PATH (optional)
+chmod +x extractorb
+sudo mv extractorb /usr/local/bin/
+```
+
 ### Building from source
 
 ```bash
@@ -40,6 +54,9 @@ extractorb https://example.com/document.pdf
 # Specify a custom output file
 extractorb path/to/document.pdf -o extracted_text.txt
 extractorb path/to/document.pdf --output extracted_text.txt
+
+# Show detailed metadata
+extractorb path/to/document.pdf --verbose
 ```
 
 ### Command-line options
@@ -52,8 +69,9 @@ Arguments:
 
 Options:
   -o, --output <OUTPUT>  Output file path [default: output.txt]
-  -h, --help            Print help
-  -V, --version         Print version
+  -v, --verbose          Show detailed metadata after extraction
+  -h, --help             Print help
+  -V, --version          Print version
 ```
 
 ## Supported File Formats
@@ -68,3 +86,19 @@ Extractorb supports all file formats that the extractous library can handle, inc
 ## License
 
 This project is licensed under the Apache License 2.0.
+
+## Continuous Integration and Deployment
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+- Every push to the `main` branch triggers a build and release process
+- The latest build is automatically published to the [GitHub Releases](https://github.com/owner/extractorb/releases/tag/latest) page with the tag `latest`
+- Pre-built binaries are available for macOS
+
+The CI/CD workflow:
+1. Builds the project using the latest stable Rust toolchain
+2. Creates a compressed tarball of the binary
+3. Generates a SHA256 checksum for verification
+4. Publishes these artifacts to GitHub Releases
+
+You can also manually trigger a build and release from the GitHub Actions tab.

@@ -17,6 +17,10 @@ struct Args {
     /// Output file path (defaults to output.txt in current directory)
     #[arg(short, long, default_value = "output.txt")]
     output: PathBuf,
+    
+    /// Show detailed metadata after extraction
+    #[arg(short, long)]
+    verbose: bool,
 }
 
 fn main() -> Result<()> {
@@ -27,12 +31,10 @@ fn main() -> Result<()> {
     
     // Extract content based on whether input is a URL or file path
     let (content, metadata) = if is_url(&args.input) {
-        println!("Extracting text from URL: {}", args.input);
         extractor
             .extract_url_to_string(&args.input)
             .context("Failed to extract text from URL")?
     } else {
-        println!("Extracting text from file: {}", args.input);
         extractor
             .extract_file_to_string(&args.input)
             .context("Failed to extract text from file")?
@@ -45,8 +47,12 @@ fn main() -> Result<()> {
     file.write_all(content.as_bytes())
         .context("Failed to write content to output file")?;
     
-    println!("Successfully extracted text to: {:?}", args.output);
-    println!("Metadata: {:?}", metadata);
+    // Only show detailed output in verbose mode
+    if args.verbose {
+        println!("Successfully extracted text from: {}", args.input);
+        println!("Output written to: {:?}", args.output);
+        println!("Metadata: {:?}", metadata);
+    }
     
     Ok(())
 }

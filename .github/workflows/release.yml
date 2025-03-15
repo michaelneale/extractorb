@@ -1,0 +1,65 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Create release directory
+        run: mkdir -p release
+
+      - name: Copy binary to release directory
+        run: |
+          cp target/release/extractorb release/
+          cd release
+          tar -czf extractorb-macos.tar.gz extractorb
+          shasum -a 256 extractorb-macos.tar.gz > extractorb-macos.tar.gz.sha256
+
+      - name: Delete existing 'latest' release if it exists
+        uses: dev-drprasad/delete-tag-and-release@v1.0
+        with:
+          tag_name: latest
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          delete_release: true
+        continue-on-error: true
+
+      - name: Create new 'latest' release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Latest Build
+          tag_name: latest
+          files: |
+            release/extractorb-macos.tar.gz
+            release/extractorb-macos.tar.gz.sha256
+          body: |
+            This is the latest build of extractorb from the main branch.
+            
+            ## Installation
+            
+            ```bash
+            # Download and extract
+            curl -L https://github.com/owner/extractorb/releases/download/latest/extractorb-macos.tar.gz -o extractorb-macos.tar.gz
+            tar -xzf extractorb-macos.tar.gz
+            
+            # Move to a directory in your PATH (optional)
+            chmod +x extractorb
+            sudo mv extractorb /usr/local/bin/
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
