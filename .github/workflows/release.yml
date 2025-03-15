@@ -54,7 +54,7 @@ jobs:
             
             ```bash
             # Download and extract
-            curl -L https://github.com/owner/extractorb/releases/download/latest/extractorb-macos.tar.gz -o extractorb-macos.tar.gz
+            curl -L https://github.com/michaelneale/extractorb/releases/download/latest/extractorb-macos.tar.gz -o extractorb-macos.tar.gz
             tar -xzf extractorb-macos.tar.gz
             
             # Move to a directory in your PATH (optional)
