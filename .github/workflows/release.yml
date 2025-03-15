@@ -30,15 +30,30 @@ jobs:
           zip -r extractorb-macos.zip extractorb
           shasum -a 256 extractorb-macos.zip > extractorb-macos.zip.sha256
 
-      # This approach uses GitHub's built-in release mechanism
+      # Delete existing tag and release
+      - name: Delete existing tag
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            try {
+              await github.rest.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: 'tags/latest'
+              });
+              console.log('Deleted existing tag');
+            } catch (error) {
+              console.log('Tag does not exist or could not be deleted');
+            }
+
+      # Create a new release
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
           tag_name: latest
-          release_name: Latest Build
+          name: Latest Build
           body: |
             This is the latest build of extractorb from the main branch.
             
@@ -55,25 +70,8 @@ jobs:
             chmod +x extractorb
             sudo mv extractorb /usr/local/bin/
             ```
-          draft: false
-          prerelease: false
-
-      - name: Upload Release Asset (Binary)
-        uses: actions/upload-release-asset@v1
+          files: |
+            dist/extractorb-macos.zip
+            dist/extractorb-macos.zip.sha256
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/extractorb-macos.zip
-          asset_name: extractorb-macos.zip
-          asset_content_type: application/zip
-
-      - name: Upload Release Asset (Checksum)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/extractorb-macos.zip.sha256
-          asset_name: extractorb-macos.zip.sha256
-          asset_content_type: text/plain
