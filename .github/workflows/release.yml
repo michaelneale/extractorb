@@ -17,14 +17,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          targets: aarch64-apple-darwin,x86_64-apple-darwin
-
-      # Build for x86_64 (Intel)
-      - name: Build release binary (x86_64)
-        run: |
-          # Set environment variable for static linking
-          export RUSTFLAGS="-C target-feature=+crt-static"
-          cargo build --release --target x86_64-apple-darwin
+          targets: aarch64-apple-darwin
 
       # Build for aarch64 (Apple Silicon)
       - name: Build release binary (aarch64)
@@ -33,30 +26,15 @@ jobs:
           export RUSTFLAGS="-C target-feature=+crt-static"
           cargo build --release --target aarch64-apple-darwin
 
-      - name: Package binaries
+      - name: Package binary
         run: |
           mkdir -p dist
           
-          # Copy x86_64 binary
-          cp target/x86_64-apple-darwin/release/extractorb dist/extractorb-x86_64
-          cd dist
-          zip -r extractorb-macos-x86_64.zip extractorb-x86_64
-          shasum -a 256 extractorb-macos-x86_64.zip > extractorb-macos-x86_64.zip.sha256
-          cd ..
-          
           # Copy aarch64 binary
-          cp target/aarch64-apple-darwin/release/extractorb dist/extractorb-aarch64
+          cp target/aarch64-apple-darwin/release/extractorb dist/extractorb
           cd dist
-          zip -r extractorb-macos-aarch64.zip extractorb-aarch64
+          zip -r extractorb-macos-aarch64.zip extractorb
           shasum -a 256 extractorb-macos-aarch64.zip > extractorb-macos-aarch64.zip.sha256
-          cd ..
-          
-          # Create universal binary (both architectures)
-          cd dist
-          lipo -create -output extractorb extractorb-x86_64 extractorb-aarch64
-          zip -r extractorb-macos-universal.zip extractorb
-          shasum -a 256 extractorb-macos-universal.zip > extractorb-macos-universal.zip.sha256
-          cd ..
 
       # Delete existing tag and release
       - name: Delete existing tag
@@ -85,33 +63,24 @@ jobs:
           body: |
             This is the latest build of extractorb from the main branch.
             
-            ## Architecture Options
+            ## Architecture
             
-            - Universal binary (works on both Intel and Apple Silicon Macs): extractorb-macos-universal.zip
-            - Intel Mac (x86_64): extractorb-macos-x86_64.zip
-            - Apple Silicon Mac (aarch64): extractorb-macos-aarch64.zip
+            - Apple Silicon Mac (aarch64) only
             
             ## Installation
             
             ```bash
-            # Download (choose one)
-            curl -LO https://github.com/michaelneale/extractorb/releases/download/latest/extractorb-macos-universal.zip
-            # OR for specific architecture:
-            # curl -LO https://github.com/michaelneale/extractorb/releases/download/latest/extractorb-macos-x86_64.zip
-            # curl -LO https://github.com/michaelneale/extractorb/releases/download/latest/extractorb-macos-aarch64.zip
+            # Download
+            curl -LO https://github.com/michaelneale/extractorb/releases/download/latest/extractorb-macos-aarch64.zip
             
             # Extract
-            unzip extractorb-macos-universal.zip
+            unzip extractorb-macos-aarch64.zip
             
             # Make executable and move to PATH (optional)
             chmod +x extractorb
             sudo mv extractorb /usr/local/bin/
             ```
           files: |
-            dist/extractorb-macos-universal.zip
-            dist/extractorb-macos-universal.zip.sha256
-            dist/extractorb-macos-x86_64.zip
-            dist/extractorb-macos-x86_64.zip.sha256
             dist/extractorb-macos-aarch64.zip
             dist/extractorb-macos-aarch64.zip.sha256
         env:
