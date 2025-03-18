@@ -13,3 +13,9 @@ A simple CLI tool that extracts text from documents and outputs it to a text fil
 ### Prerequisites
 
 Make sure you have Rust and Cargo installed. If not, install them from [rustup.rs](https://rustup.rs/).
+
+
+### Using in goose
+
+Ask goose: 
+"please use this program https://github.com/michaelneale/extractorb/releases/download/latest/extractorb to process PDFs from here on."
